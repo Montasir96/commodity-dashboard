@@ -7,7 +7,7 @@
 
 <style>
 body{
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   margin:0;
   background:#0b1f3b;
   color:white;
@@ -19,49 +19,31 @@ body{
   background:#0f2a4d;
 }
 
-.status{
-  text-align:center;
-  padding:10px;
-  background:#061a33;
-  font-size:14px;
-}
-
 .container{
   padding:20px;
-}
-
-.cards{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.card{
-  flex:1;
-  min-width:200px;
-  background:white;
-  color:black;
-  padding:15px;
-  border-radius:10px;
-}
-
-.table-box{
-  margin-top:20px;
-  background:white;
-  color:black;
-  padding:10px;
-  border-radius:10px;
-  overflow-x:auto;
 }
 
 table{
   width:100%;
   border-collapse:collapse;
+  background:white;
+  color:black;
+  border-radius:10px;
+  overflow:hidden;
 }
 
 th,td{
-  padding:8px;
+  padding:10px;
   border-bottom:1px solid #ddd;
+  text-align:left;
+}
+
+.card{
+  background:white;
+  color:black;
+  padding:15px;
+  margin-top:10px;
+  border-radius:10px;
 }
 </style>
 
@@ -70,48 +52,23 @@ th,td{
 <body>
 
 <div class="header">
-  <h1>📊 Live Commodity Dashboard</h1>
-  <p>Real-time prices from Google Sheets</p>
-</div>
-
-<div class="status">
-  🟢 Live System | Auto Refresh: 30s | <span id="time"></span>
+  <h1>📊 কমোডিটি ড্যাশবোর্ড</h1>
+  <p>লাইভ প্রাইস আপডেট</p>
 </div>
 
 <div class="container">
 
-  <div class="cards">
-    <div class="card">
-      <h3>Highest Price</h3>
-      <p id="high">Loading...</p>
-    </div>
-
-    <div class="card">
-      <h3>Lowest Price</h3>
-      <p id="low">Loading...</p>
-    </div>
-
-    <div class="card">
-      <h3>Average Price</h3>
-      <p id="avg">Loading...</p>
-    </div>
-  </div>
-
-  <div class="table-box">
-    <h3>Live Commodity Table</h3>
-
-    <table id="table">
-      <thead>
-        <tr>
-          <th>Commodity</th>
-          <th>Price</th>
-          <th>Unit</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-  </div>
+  <table id="table">
+    <thead>
+      <tr>
+        <th>পণ্য</th>
+        <th>সর্বনিম্ন মূল্য</th>
+        <th>সর্বোচ্চ মূল্য</th>
+        <th>আপডেট</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
 </div>
 
@@ -127,43 +84,30 @@ async function loadData(){
     let table = document.querySelector("#table tbody");
     table.innerHTML = "";
 
-    let prices = [];
-
     data.forEach(row => {
+
+      if(!row["পণ্য"]) return; // skip empty rows
+
       let tr = document.createElement("tr");
 
       tr.innerHTML = `
-        <td>${row.Commodity}</td>
-        <td>${row.Price}</td>
-        <td>${row.Unit || ""}</td>
+        <td>${row["পণ্য"]}</td>
+        <td>${row["সর্বনিম্ন মূল্য (টাকা)"] || "-"}</td>
+        <td>${row["সর্বোচ্চ মূল্য (টাকা)"] || "-"}</td>
+        <td>${row["সর্বশেষ আপডেট"] || "-"}</td>
       `;
 
       table.appendChild(tr);
-
-      if(!isNaN(row.Price)) prices.push(Number(row.Price));
     });
-
-    if(prices.length){
-      document.getElementById("high").innerText = Math.max(...prices);
-      document.getElementById("low").innerText = Math.min(...prices);
-      document.getElementById("avg").innerText =
-        (prices.reduce((a,b)=>a+b,0)/prices.length).toFixed(2);
-    }
 
   }catch(err){
     console.log(err);
   }
 }
 
-function updateTime(){
-  document.getElementById("time").innerText = new Date().toLocaleString();
-}
-
 loadData();
-updateTime();
 
 setInterval(loadData,30000);
-setInterval(updateTime,1000);
 
 </script>
 
