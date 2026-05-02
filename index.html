@@ -1,16 +1,88 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Live Sheet</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Commodity Dashboard</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#0b1f3b;
+  color:white;
+}
+
+.header{
+  text-align:center;
+  padding:20px;
+  background:#0f2a4d;
+}
+
+.header h1{
+  margin:0;
+  font-size:26px;
+}
+
+.sub{
+  font-size:14px;
+  opacity:0.8;
+}
+
+.container{
+  padding:20px;
+}
+
+.card{
+  background:white;
+  color:black;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:15px;
+}
+
+iframe{
+  width:100%;
+  height:75vh;
+  border:none;
+  border-radius:10px;
+  background:white;
+}
+
+.footer{
+  text-align:center;
+  font-size:12px;
+  padding:10px;
+  opacity:0.7;
+}
+</style>
 </head>
+
 <body>
 
-<h2>📊 Live Google Sheet</h2>
+<div class="header">
+  <h1>📊 Live Commodity Dashboard</h1>
+  <div class="sub">Powered by Google Sheets • Auto Updated</div>
+</div>
 
-<iframe 
-src="https://docs.google.com/spreadsheets/d/147Gm_uJiSZjAq1bUBVMKrbLODfOzupLLsfv_F_8-v74/pubhtml?gid=0&single=true&widget=true&headers=false"
-width="100%" height="600">
-</iframe>
+<div class="container">
+
+  <div class="card">
+    🟢 Status: Live Data Connected  
+    <br>
+    ⏱ Auto updates via Google Sheets publish link
+  </div>
+
+  <!-- GOOGLE SHEET EMBED -->
+  <iframe 
+    src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQyNWX4Wjf1SjRvVbuh01eCAjbxtehyxBCZn5S6gPs6__8ivFSEML2fnzMwwM_PW1zZS-DPGKzj8mGM/pubhtml?gid=0&single=true&widget=true&headers=false">
+  </iframe>
+
+</div>
+
+<div class="footer">
+  © 2026 Commodity Dashboard | Built with Google Sheets
+</div>
 
 </body>
 </html>
