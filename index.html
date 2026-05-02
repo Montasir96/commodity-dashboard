@@ -1,159 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bangladesh Commodity Prices — BDT</title>
-
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Live Commodity Dashboard</title>
 
 <style>
-/* ===== YOUR ORIGINAL CSS (UNCHANGED FOR BREVITY) ===== */
-/* (keeping same styles from your code — not repeating fully to avoid size overflow) */
-
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: #f5f4f0;
-  margin: 0;
+body{
+  font-family: Arial, sans-serif;
+  margin:0;
+  background:#0b1f3b;
+  color:white;
 }
-
-/* minimal styling fallback if needed */
+.header{
+  padding:20px;
+  text-align:center;
+  background:#0f2a4d;
+}
+.status{
+  text-align:center;
+  padding:10px;
+  background:#06203a;
+  font-size:14px;
+}
+.container{
+  padding:20px;
+}
+.cards{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.card{
+  flex:1;
+  min-width:200px;
+  background:white;
+  color:black;
+  padding:15px;
+  border-radius:10px;
+}
+.table-container{
+  margin-top:20px;
+  background:white;
+  color:black;
+  padding:10px;
+  border-radius:10px;
+  overflow-x:auto;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th,td{
+  border-bottom:1px solid #ddd;
+  padding:8px;
+  text-align:left;
+}
+.refresh{
+  font-size:12px;
+  color:#ccc;
+}
 </style>
 </head>
 
 <body>
 
-<nav>
-  <div>BD Commodity Prices</div>
-  <button onclick="loadData()">🔄 Refresh</button>
-</nav>
-
-<div id="content">
-  <h2>Loading data from Google Sheets...</h2>
+<div class="header">
+  <h1>📊 Live Commodity Dashboard</h1>
+  <p>Real-time prices from Google Sheets</p>
 </div>
 
-<canvas id="mainChart" height="100"></canvas>
+<div class="status">
+  🟢 Live System | Auto Refresh Every 30 Seconds | <span id="time"></span>
+</div>
+
+<div class="container">
+
+  <div class="cards">
+    <div class="card">
+      <h3>Highest Price</h3>
+      <p id="high">Loading...</p>
+    </div>
+    <div class="card">
+      <h3>Lowest Price</h3>
+      <p id="low">Loading...</p>
+    </div>
+    <div class="card">
+      <h3>Average Price</h3>
+      <p id="avg">Loading...</p>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <h3>Live Commodity Table</h3>
+    <p class="refresh">Auto-updating from Google Sheets API</p>
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th>Commodity</th>
+          <th>Price</th>
+          <th>Unit</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+</div>
 
 <script>
-let commodities = [];
-let selectedId = null;
-let chart = null;
 
-/* =========================
-   1. LOAD FROM GOOGLE SHEET
-========================= */
+// 🔥 PUT YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
+const API_URL = "https://script.google.com/macros/s/AKfycbwNKOOSnVta1is57o0CtsD0LqVoPw3RsJCmQJPKKrOHEPbNP9zp9hwD1IfM5iVLh81Q7g/exec";
 
-async function loadData() {
-  const SHEET_ID = "https://docs.google.com/spreadsheets/d/147Gm_uJiSZjAq1bUBVMKrbLODfOzupLLsfv_F_8-v74/edit?usp=sharing"; // 👈 CHANGE THIS
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+async function fetchData(){
+  try{
+    const res = await fetch(API_URL);
+    const data = await res.json();
 
-  const res = await fetch(url);
-  const text = await res.text();
+    let table = document.querySelector("#dataTable tbody");
+    table.innerHTML = "";
 
-  const rows = text.trim().split("\n").slice(1);
+    let prices = [];
 
-  commodities = rows.map(r => {
-    const [id, name, minP, maxP] = r.split(",");
+    data.forEach(row => {
+      let tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${row.Commodity}</td>
+        <td>${row.Price}</td>
+        <td>${row.Unit || ''}</td>
+      `;
+      table.appendChild(tr);
 
-    return {
-      id: id.trim(),
-      name: name.trim(),
-      minP: parseFloat(minP),
-      maxP: parseFloat(maxP)
-    };
-  });
+      if(!isNaN(row.Price)) prices.push(Number(row.Price));
+    });
 
-  selectedId = commodities[0].id;
-
-  render();
-}
-
-/* =========================
-   2. SIMPLE UI RENDER
-========================= */
-
-function render() {
-  let html = "<h2>Commodities</h2><div style='display:grid;gap:10px;'>";
-
-  commodities.forEach(c => {
-    html += `
-      <div onclick="select('${c.id}')" style="padding:10px;border:1px solid #ccc;cursor:pointer;">
-        <b>${c.name}</b><br>
-        Min: ৳${c.minP} | Max: ৳${c.maxP}
-      </div>
-    `;
-  });
-
-  html += "</div>";
-  document.getElementById("content").innerHTML = html;
-
-  updateChart();
-}
-
-/* =========================
-   3. SELECT COMMODITY
-========================= */
-
-function select(id) {
-  selectedId = id;
-  updateChart();
-}
-
-/* =========================
-   4. FAKE HISTORY (can upgrade later)
-========================= */
-
-function generateHistory(baseMin, baseMax, days = 30) {
-  let min = [], max = [];
-
-  for (let i = 0; i < days; i++) {
-    min.push(baseMin + Math.sin(i / 3) * 5);
-    max.push(baseMax + Math.cos(i / 3) * 5);
-  }
-
-  return { min, max };
-}
-
-/* =========================
-   5. CHART
-========================= */
-
-function updateChart() {
-  const c = commodities.find(x => x.id === selectedId);
-  if (!c) return;
-
-  const data = generateHistory(c.minP, c.maxP);
-
-  if (chart) chart.destroy();
-
-  chart = new Chart(document.getElementById("mainChart"), {
-    type: "line",
-    data: {
-      labels: Array.from({ length: 30 }, (_, i) => i + 1),
-      datasets: [
-        {
-          label: "Max Price",
-          data: data.max,
-          borderColor: "red",
-          fill: false
-        },
-        {
-          label: "Min Price",
-          data: data.min,
-          borderColor: "green",
-          fill: false
-        }
-      ]
+    // stats
+    if(prices.length){
+      document.getElementById("high").innerText = Math.max(...prices);
+      document.getElementById("low").innerText = Math.min(...prices);
+      document.getElementById("avg").innerText = 
+        (prices.reduce((a,b)=>a+b,0)/prices.length).toFixed(2);
     }
-  });
+
+  }catch(e){
+    console.log(e);
+  }
 }
 
-/* =========================
-   INIT
-========================= */
+function updateTime(){
+  document.getElementById("time").innerText = new Date().toLocaleString();
+}
 
-loadData();
+fetchData();
+updateTime();
+
+setInterval(fetchData,30000); // 30 sec refresh
+setInterval(updateTime,1000);
 
 </script>
 
