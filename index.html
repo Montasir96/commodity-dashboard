@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Live Commodity Dashboard</title>
 
 <style>
@@ -12,25 +12,30 @@ body{
   background:#0b1f3b;
   color:white;
 }
+
 .header{
-  padding:20px;
   text-align:center;
+  padding:20px;
   background:#0f2a4d;
 }
+
 .status{
   text-align:center;
   padding:10px;
-  background:#06203a;
+  background:#061a33;
   font-size:14px;
 }
+
 .container{
   padding:20px;
 }
+
 .cards{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
 }
+
 .card{
   flex:1;
   min-width:200px;
@@ -39,7 +44,8 @@ body{
   padding:15px;
   border-radius:10px;
 }
-.table-container{
+
+.table-box{
   margin-top:20px;
   background:white;
   color:black;
@@ -47,20 +53,18 @@ body{
   border-radius:10px;
   overflow-x:auto;
 }
+
 table{
   width:100%;
   border-collapse:collapse;
 }
+
 th,td{
-  border-bottom:1px solid #ddd;
   padding:8px;
-  text-align:left;
-}
-.refresh{
-  font-size:12px;
-  color:#ccc;
+  border-bottom:1px solid #ddd;
 }
 </style>
+
 </head>
 
 <body>
@@ -71,7 +75,7 @@ th,td{
 </div>
 
 <div class="status">
-  🟢 Live System | Auto Refresh Every 30 Seconds | <span id="time"></span>
+  🟢 Live System | Auto Refresh: 30s | <span id="time"></span>
 </div>
 
 <div class="container">
@@ -81,20 +85,22 @@ th,td{
       <h3>Highest Price</h3>
       <p id="high">Loading...</p>
     </div>
+
     <div class="card">
       <h3>Lowest Price</h3>
       <p id="low">Loading...</p>
     </div>
+
     <div class="card">
       <h3>Average Price</h3>
       <p id="avg">Loading...</p>
     </div>
   </div>
 
-  <div class="table-container">
+  <div class="table-box">
     <h3>Live Commodity Table</h3>
-    <p class="refresh">Auto-updating from Google Sheets API</p>
-    <table id="dataTable">
+
+    <table id="table">
       <thead>
         <tr>
           <th>Commodity</th>
@@ -104,47 +110,48 @@ th,td{
       </thead>
       <tbody></tbody>
     </table>
+
   </div>
 
 </div>
 
 <script>
 
-// 🔥 PUT YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
-const API_URL = "https://script.google.com/macros/s/AKfycbwNKOOSnVta1is57o0CtsD0LqVoPw3RsJCmQJPKKrOHEPbNP9zp9hwD1IfM5iVLh81Q7g/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycby7hYYpP5xnNqty86-ClT2K3YVBKyXJovkarnP2WDA_/exec";
 
-async function fetchData(){
+async function loadData(){
   try{
     const res = await fetch(API_URL);
     const data = await res.json();
 
-    let table = document.querySelector("#dataTable tbody");
+    let table = document.querySelector("#table tbody");
     table.innerHTML = "";
 
     let prices = [];
 
     data.forEach(row => {
       let tr = document.createElement("tr");
+
       tr.innerHTML = `
         <td>${row.Commodity}</td>
         <td>${row.Price}</td>
-        <td>${row.Unit || ''}</td>
+        <td>${row.Unit || ""}</td>
       `;
+
       table.appendChild(tr);
 
       if(!isNaN(row.Price)) prices.push(Number(row.Price));
     });
 
-    // stats
     if(prices.length){
       document.getElementById("high").innerText = Math.max(...prices);
       document.getElementById("low").innerText = Math.min(...prices);
-      document.getElementById("avg").innerText = 
+      document.getElementById("avg").innerText =
         (prices.reduce((a,b)=>a+b,0)/prices.length).toFixed(2);
     }
 
-  }catch(e){
-    console.log(e);
+  }catch(err){
+    console.log(err);
   }
 }
 
@@ -152,10 +159,10 @@ function updateTime(){
   document.getElementById("time").innerText = new Date().toLocaleString();
 }
 
-fetchData();
+loadData();
 updateTime();
 
-setInterval(fetchData,30000); // 30 sec refresh
+setInterval(loadData,30000);
 setInterval(updateTime,1000);
 
 </script>
