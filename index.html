@@ -1,115 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Live Commodity Dashboard</title>
-
-<style>
-body{
-  font-family: Arial;
-  margin:0;
-  background:#0b1f3b;
-  color:white;
-}
-
-.header{
-  text-align:center;
-  padding:20px;
-  background:#0f2a4d;
-}
-
-.container{
-  padding:20px;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  background:white;
-  color:black;
-  border-radius:10px;
-  overflow:hidden;
-}
-
-th,td{
-  padding:10px;
-  border-bottom:1px solid #ddd;
-  text-align:left;
-}
-
-.card{
-  background:white;
-  color:black;
-  padding:15px;
-  margin-top:10px;
-  border-radius:10px;
-}
-</style>
-
+<title>Live Sheet</title>
 </head>
-
 <body>
 
-<div class="header">
-  <h1>📊 কমোডিটি ড্যাশবোর্ড</h1>
-  <p>লাইভ প্রাইস আপডেট</p>
-</div>
+<h2>📊 Live Google Sheet</h2>
 
-<div class="container">
-
-  <table id="table">
-    <thead>
-      <tr>
-        <th>পণ্য</th>
-        <th>সর্বনিম্ন মূল্য</th>
-        <th>সর্বোচ্চ মূল্য</th>
-        <th>আপডেট</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-</div>
-
-<script>
-
-const API_URL = "https://script.google.com/macros/s/AKfycby7hYYpP5xnNqty86-ClT2K3YVBKyXJovkarnP2WDA_/exec";
-
-async function loadData(){
-  try{
-    const res = await fetch(API_URL);
-    const data = await res.json();
-
-    let table = document.querySelector("#table tbody");
-    table.innerHTML = "";
-
-    data.forEach(row => {
-
-      if(!row["পণ্য"]) return; // skip empty rows
-
-      let tr = document.createElement("tr");
-
-      tr.innerHTML = `
-        <td>${row["পণ্য"]}</td>
-        <td>${row["সর্বনিম্ন মূল্য (টাকা)"] || "-"}</td>
-        <td>${row["সর্বোচ্চ মূল্য (টাকা)"] || "-"}</td>
-        <td>${row["সর্বশেষ আপডেট"] || "-"}</td>
-      `;
-
-      table.appendChild(tr);
-    });
-
-  }catch(err){
-    console.log(err);
-  }
-}
-
-loadData();
-
-setInterval(loadData,30000);
-
-</script>
+<iframe 
+src="https://docs.google.com/spreadsheets/d/147Gm_uJiSZjAq1bUBVMKrbLODfOzupLLsfv_F_8-v74/pubhtml?gid=0&single=true&widget=true&headers=false"
+width="100%" height="600">
+</iframe>
 
 </body>
 </html>
